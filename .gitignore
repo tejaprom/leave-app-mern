@@ -1,0 +1,35 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Dependency directories
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Environment variables
+.env
+server/.env
+client/.env
+
+# Build output
+dist/
+build/
+client/dist/
+server/dist/
+
+# Vite & Next cache
+.vite/
+.next/
+.cache/
+
+# Mac system files
+.DS_Store
+
+# IDE settings
+.vscode/
+.idea/
+
+# Optional: OS-generated files
+Thumbs.db
