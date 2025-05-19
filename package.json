@@ -1,0 +1,15 @@
+{
+  "name": "leave-app-mern",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npx nodemon index.js",
+    "client": "cd client && npm run dev"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  },
+  "dependencies": {
+    "firebase": "^11.7.3"
+  }
+}
