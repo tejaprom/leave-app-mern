@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import axios from 'axios';
 import '../styles/ForgotPassword.css';
 import { useNavigate } from 'react-router-dom';
 import BackToHome from '../components/BackToHome';
-
+import axios from '../utils/axiosConfig';
 const ForgotPassword = () => {
     const [email, setEmail] = useState('');
     const [message, setMessage] = useState('');
