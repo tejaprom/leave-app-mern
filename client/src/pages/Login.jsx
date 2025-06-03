@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { auth, provider } from "../firebase";
 import { signInWithPopup } from "firebase/auth";
+import { Input } from 'antd';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -77,13 +78,23 @@ const Login = () => {
                         onChange={(e) => setEmail(e.target.value)}
                         required
                     /><br /><br />
-                    <input
+                    {/* <input
                         type="password"
                         placeholder="Password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
-                    /><br /><br />
+                    /> */}
+
+                    <Input.Password
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                    />
+
+
+                    <br /><br />
                     <button type="submit">Login</button>
                 </form>
                 <p style={{ marginTop: '10px' }}>
