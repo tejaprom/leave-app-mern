@@ -22,6 +22,10 @@ app.use('/api/auth', authRoutes);
 const leaveRoutes = require('./routes/leaveRoutes');
 app.use('/api/leaves', leaveRoutes);
 
+//upload file
+const path = require('path');
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 app.get('/', (req, res) => {
   res.send('Leave App backend running!');
 });

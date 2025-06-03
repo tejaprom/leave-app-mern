@@ -3,9 +3,25 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
+  /* color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  background-color: #242424; */
+
+  body, html {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background-color: #ffffff; /* optional: make toasts more visible */
+}
+
+.ant-message {
+  z-index: 9999 !important;
+}
+
+.ant-message-notice-content {
+  color: #000; /* make sure text is visible */
+}
+
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;

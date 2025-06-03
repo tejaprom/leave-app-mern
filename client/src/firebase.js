@@ -2,9 +2,12 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
+// Get API key from Vite env
+const apiKey = import.meta.env.VITE_FIREBASE_API_KEY;
+
 // Your Firebase config
 const firebaseConfig = {
-  apiKey: "AIzaSyBW4VNI-Prjqzy09T7Il2hhJqOGMIanfoI",
+  apiKey: apiKey,
   authDomain: "leave-app-mern.firebaseapp.com",
   projectId: "leave-app-mern",
   storageBucket: "leave-app-mern.appspot.com",
