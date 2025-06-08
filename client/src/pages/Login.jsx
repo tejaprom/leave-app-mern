@@ -53,7 +53,7 @@ const Login = () => {
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));
 
-            navigate('/dashboard');
+            navigate('/dashboard', { state: { loginSuccess: true } });
 
             //   if (user.role === 'manager') {
             //     navigate('/manager-dashboard');

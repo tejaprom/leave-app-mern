@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Table, Spin, Button, Modal, Form, Input, DatePicker, message, Tag } from 'antd';
 import moment from 'moment';
 import dayjs from 'dayjs';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const user = JSON.parse(localStorage.getItem('user'));
@@ -15,6 +15,19 @@ const Dashboard = () => {
   const [isReviewModalVisible, setIsReviewModalVisible] = useState(false);
   const [allLeaves, setAllLeaves] = useState([]);
   const navigate = useNavigate();
+
+  const location = useLocation();
+  const toastShown = useRef(false);
+
+  useEffect(() => {
+    if (location.state?.loginSuccess && !toastShown.current) {
+      message.success("Login successful!");
+      toastShown.current = true;
+
+      // Optional: remove the state from history to avoid re-trigger on back
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   const handleLogout = () => {
     localStorage.removeItem('token'); // or 'accessToken' if that's what you're using
@@ -201,7 +214,8 @@ const Dashboard = () => {
 
         </>
       )}
-      <Button onClick={() => message.success('This is a test message')}>Test Toast</Button>
+
+      {/* <Button onClick={() => message.success('This is a test message')}>Test Toast</Button> */}
 
       <Modal
         title="Apply for Leave"
