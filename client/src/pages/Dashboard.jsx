@@ -1,13 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Table, Spin, Button, Modal, Form, Input, DatePicker, message, Tag } from 'antd';
-import moment from 'moment';
 import dayjs from 'dayjs';
 import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { showToast } from '../utils/showToast';
+import Header from '../components/Header';
 
 const Dashboard = () => {
   const user = JSON.parse(localStorage.getItem('user'));
-  const [leaves, setLeaves] = useState([]);
+  // const [leaves, setLeaves] = useState([]);
+  const [myLeaves, setMyLeaves] = useState([]);
+  const [pendingLeaves, setPendingLeaves] = useState([]);
+
   const [loading, setLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
@@ -17,17 +21,26 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   const location = useLocation();
-  const toastShown = useRef(false);
+
+  // const toastShown = useRef(false);
+  // useEffect(() => {
+  //   if (location.state?.loginSuccess && !toastShown.current) {
+  //     message.success("Login successful!");
+  //     toastShown.current = true;
+
+  //     // Optional: remove the state from history to avoid re-trigger on back
+  //     window.history.replaceState({}, document.title);
+  //   }
+  // }, [location]);
 
   useEffect(() => {
-    if (location.state?.loginSuccess && !toastShown.current) {
-      message.success("Login successful!");
-      toastShown.current = true;
-
-      // Optional: remove the state from history to avoid re-trigger on back
-      window.history.replaceState({}, document.title);
+    if (location.state?.loginSuccess) {
+      showToast('login-success', 'success', 'Login successful!');
+      // Clear state after toast
+      navigate(location.pathname, { replace: true });
     }
-  }, [location]);
+  }, [location, navigate]);
+
 
   const handleLogout = () => {
     localStorage.removeItem('token'); // or 'accessToken' if that's what you're using
@@ -42,7 +55,11 @@ const Dashboard = () => {
       const res = await axios.get('http://localhost:5000/api/leaves/getleaves', {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setLeaves(res.data);
+      // setLeaves(res.data);
+      setMyLeaves(res.data.myLeaves);
+      if (user.role === "manager") {
+        setPendingLeaves(res.data.pendingLeaves);
+      }
     } catch (err) {
       console.error('Error fetching leaves:', err);
     } finally {
@@ -70,6 +87,12 @@ const Dashboard = () => {
       render: date => new Date(date).toLocaleDateString(),
     },
     {
+      title: 'Applied On',
+      dataIndex: 'appliedDate',
+      key: 'appliedDate',
+      render: (date) => dayjs(date).format('DD-MM-YYYY'),
+    },
+    {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
@@ -95,8 +118,8 @@ const Dashboard = () => {
 
   ];
 
-  const myLeaves = leaves.filter(l => l.name === user.name);
-  const pendingLeaves = leaves.filter(l => l.status === 'Pending');
+  // const myLeaves = leaves.filter(l => l.name === user.name);
+  // const pendingLeaves = leaves.filter(l => l.status === 'Pending');
 
   const handleApply = async (values) => {
     try {
@@ -172,170 +195,195 @@ const Dashboard = () => {
 
 
   return (
-    <div style={{ padding: 24 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2>Welcome, {user?.name}</h2>
-        <button onClick={handleLogout} style={{ padding: '6px 12px', cursor: 'pointer', background: "transparent", border: "1px solid black" }}>Logout</button>
-      </div>
-      <p>Role: {user?.role}</p>
+    <>
+      <Header />
+      <div style={{ padding: 24 }}>
+        <h3>My Applied Leaves</h3>
+        {/* {loading ? <Spin /> : (
+          <>
+            <Table
+              dataSource={myLeaves}
+              columns={columns}
+              rowKey="_id"
+              pagination={{ pageSize: 5 }}
+            />
+            <div style={{ textAlign: 'center', marginBottom: 36 }}>
+              <Button type="primary" onClick={() => setIsModalVisible(true)}>
+                Apply for Leave
+              </Button>
+            </div>
+          </>
+        )} */}
 
-      <h3>My Applied Leaves</h3>
-      {loading ? <Spin /> : (
-        <>
-          <Table
-            dataSource={myLeaves}
-            columns={columns}
-            rowKey="_id"
-            pagination={{ pageSize: 5 }}
-          />
-          <div style={{ textAlign: 'center', marginBottom: 36 }}>
-            <Button type="primary" onClick={() => setIsModalVisible(true)}>
-              Apply for Leave
-            </Button>
-          </div>
-        </>
-      )}
+        {loading ? <Spin /> : (
+          <>
+            <Table
+              dataSource={myLeaves.slice(0, 5)} // Only first 5 leaves
+              columns={columns}
+              rowKey="_id"
+              pagination={false}
+            />
+            <div style={{ textAlign: 'end', marginTop: 16 }}>
+              <Button type="link" style={{ textDecoration: 'underline' }} onClick={() => navigate('/leave-details')}>
+                View All
+              </Button>
+            </div>
+            <div style={{ textAlign: 'center', marginBottom: 36 }}>
+              <Button type="primary" onClick={() => setIsModalVisible(true)}>
+                Apply for Leave
+              </Button>
+            </div>
+          </>
+        )}
 
-      {user.role === 'manager' && (
-        <>
-          <h3>Leave Requests (All Pending)</h3>
+
+        {user.role === 'manager' && (
+          <>
+            <h3>Leave Requests (All Pending)</h3>
+            <Table
+              // dataSource={pendingLeaves}
+              dataSource={pendingLeaves.slice(0, 5)} // Only first 5
+              columns={columns}
+              rowKey="_id"
+              pagination={false}
+            // pagination={{ pageSize: 5 }}
+            />
+            <div style={{ textAlign: 'end', marginTop: 16 }}>
+              <Button type="link" style={{ textDecoration: 'underline' }} onClick={() => navigate('/leave-details')}>
+                View All
+              </Button>
+            </div>
+            <div style={{ textAlign: 'center', marginBottom: 36 }}>
+
+              <Button type="primary" onClick={openReviewModal} >
+                Review Leave Requests
+              </Button>
+            </div>
+
+          </>
+        )}
+
+        {/* <Button onClick={() => message.success('This is a test message')}>Test Toast</Button> */}
+
+        <Modal
+          title="Apply for Leave"
+          open={isModalVisible}
+          onCancel={() => setIsModalVisible(false)}
+          onOk={() => form.submit()}
+          okText="Submit"
+        >
+          <Form form={form} onFinish={handleApply} layout="vertical" encType="multipart/form-data">
+            <Form.Item
+              name="leaveType"
+              label="Leave Type"
+              rules={[{ required: true, message: 'Please select leave type' }]}
+            >
+              <Input placeholder="e.g., Sick, Casual, Vacation" />
+            </Form.Item>
+
+            <Form.Item
+              name="reason"
+              label="Reason"
+              rules={[{ required: true, message: 'Please enter a reason' }]}
+            >
+              <Input.TextArea placeholder="e.g., Feeling unwell..." />
+            </Form.Item>
+
+            <Form.Item
+              name="range"
+              label="Leave Duration"
+              rules={[{ required: true, message: 'Please select a date range' }]}
+            >
+              <DatePicker.RangePicker format="YYYY-MM-DD" />
+            </Form.Item>
+
+            <Form.Item name="attachment" label="Attachment (Optional)">
+              <Input type="file" />
+            </Form.Item>
+          </Form>
+
+        </Modal>
+
+
+        <Modal
+          title="Review Leave Requests"
+          open={isReviewModalVisible}
+          onCancel={() => setIsReviewModalVisible(false)}
+          footer={null}
+          width={800}
+        >
           <Table
             dataSource={pendingLeaves}
-            columns={columns}
             rowKey="_id"
-            pagination={{ pageSize: 5 }}
-          />
-          <div style={{ textAlign: 'center', marginBottom: 36 }}>
-
-            <Button type="primary" onClick={openReviewModal} >
-              Review Leave Requests
-            </Button>
-          </div>
-
-        </>
-      )}
-
-      {/* <Button onClick={() => message.success('This is a test message')}>Test Toast</Button> */}
-
-      <Modal
-        title="Apply for Leave"
-        open={isModalVisible}
-        onCancel={() => setIsModalVisible(false)}
-        onOk={() => form.submit()}
-        okText="Submit"
-      >
-        <Form form={form} onFinish={handleApply} layout="vertical" encType="multipart/form-data">
-          <Form.Item
-            name="leaveType"
-            label="Leave Type"
-            rules={[{ required: true, message: 'Please select leave type' }]}
-          >
-            <Input placeholder="e.g., Sick, Casual, Vacation" />
-          </Form.Item>
-
-          <Form.Item
-            name="reason"
-            label="Reason"
-            rules={[{ required: true, message: 'Please enter a reason' }]}
-          >
-            <Input.TextArea placeholder="e.g., Feeling unwell..." />
-          </Form.Item>
-
-          <Form.Item
-            name="range"
-            label="Leave Duration"
-            rules={[{ required: true, message: 'Please select a date range' }]}
-          >
-            <DatePicker.RangePicker format="YYYY-MM-DD" />
-          </Form.Item>
-
-          <Form.Item name="attachment" label="Attachment (Optional)">
-            <Input type="file" />
-          </Form.Item>
-        </Form>
-
-      </Modal>
-
-
-      <Modal
-        title="Review Leave Requests"
-        open={isReviewModalVisible}
-        onCancel={() => setIsReviewModalVisible(false)}
-        footer={null}
-        width={800}
-      >
-        <Table
-          dataSource={allLeaves}
-          rowKey="_id"
-          columns={[
-            {
-              title: 'Name',
-              dataIndex: 'name',
-            },
-            {
-              title: 'Type',
-              dataIndex: 'leaveType',
-            },
-            {
-              title: 'Reason',
-              dataIndex: 'reason',
-            },
-            {
-              title: 'From',
-              dataIndex: 'fromDate',
-              render: date => dayjs(date).format('YYYY-MM-DD'),
-            },
-            {
-              title: 'To',
-              dataIndex: 'toDate',
-              render: date => dayjs(date).format('YYYY-MM-DD'),
-            },
-            {
-              title: 'Attachment',
-              dataIndex: 'attachment',
-              render: file =>
-                file ? (
-                  <a href={`http://localhost:5000/uploads/${file}`} target="_blank" rel="noreferrer">
-                    View
-                  </a>
-                ) : (
-                  'N/A'
+            columns={[
+              {
+                title: 'Name',
+                dataIndex: 'name',
+              },
+              {
+                title: 'Type',
+                dataIndex: 'leaveType',
+              },
+              {
+                title: 'Reason',
+                dataIndex: 'reason',
+              },
+              {
+                title: 'From',
+                dataIndex: 'fromDate',
+                render: date => dayjs(date).format('YYYY-MM-DD'),
+              },
+              {
+                title: 'To',
+                dataIndex: 'toDate',
+                render: date => dayjs(date).format('YYYY-MM-DD'),
+              },
+              {
+                title: 'Attachment',
+                dataIndex: 'attachment',
+                render: file =>
+                  file ? (
+                    <a href={`http://localhost:5000/uploads/${file}`} target="_blank" rel="noreferrer">
+                      View
+                    </a>
+                  ) : (
+                    'N/A'
+                  ),
+              },
+              {
+                title: 'Status',
+                dataIndex: 'status',
+              },
+              {
+                title: 'Action',
+                render: (_, record) => (
+                  <>
+                    <Button
+                      type="primary"
+                      size="small"
+                      onClick={() => handleDecision(record._id, 'Approved')}
+                      style={{ width: 100 }}
+                    >
+                      Approve
+                    </Button>
+                    <Button
+                      danger
+                      size="small"
+                      style={{ width: 100, marginTop: 5 }}
+                      onClick={() => handleDecision(record._id, 'Rejected')}
+                    >
+                      Reject
+                    </Button>
+                  </>
                 ),
-            },
-            {
-              title: 'Status',
-              dataIndex: 'status',
-            },
-            {
-              title: 'Action',
-              render: (_, record) => (
-                <>
-                  <Button
-                    type="primary"
-                    size="small"
-                    onClick={() => handleDecision(record._id, 'Approved')}
-                    style={{ width: 100 }}
-                  >
-                    Approve
-                  </Button>
-                  <Button
-                    danger
-                    size="small"
-                    style={{ width: 100, marginTop: 5 }}
-                    onClick={() => handleDecision(record._id, 'Rejected')}
-                  >
-                    Reject
-                  </Button>
-                </>
-              ),
-            },
-          ]}
-          pagination={false}
-        />
-      </Modal>
+              },
+            ]}
+            pagination={false}
+          />
+        </Modal>
+      </div>
 
-
-    </div>
+    </>
   );
 };
 

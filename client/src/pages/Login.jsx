@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import '../styles/Login.css';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { auth, provider } from "../firebase";
 import { signInWithPopup } from "firebase/auth";
 import { Input } from 'antd';
+import axiosInstance from '../utils/axiosConfig';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -44,10 +44,16 @@ const Login = () => {
         setError('');
 
         try {
-            const res = await axios.post('http://localhost:5000/api/auth/login', {
+
+            const res = await axiosInstance.post('http://localhost:5000/api/auth/login', {
                 email,
                 password,
             });
+
+            // const res = await axiosInstance.post('api/auth/login', {
+            //     email,
+            //     password,
+            // });
 
             const { token, user } = res.data;
             localStorage.setItem('token', token);

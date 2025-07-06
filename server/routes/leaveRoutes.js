@@ -20,19 +20,15 @@ const path = require("path");
 
 router.get("/getleaves", protect, async (req, res) => {
   try {
-    let leaves;
+    let myLeaves = await Leave.find({ name: req.user.name }).sort({ createdAt: -1 });
 
+    let pendingLeaves = [];
     if (req.user.role === "manager") {
-      // Manager sees all
-      leaves = await Leave.find().sort({ createdAt: -1 });
-    } else {
-      // Employee sees only their own
-      leaves = await Leave.find({ name: req.user.name }).sort({
-        createdAt: -1,
-      });
+      // Only show others' pending leaves
+      pendingLeaves = await Leave.find({ status: "Pending", name: { $ne: req.user.name } }).sort({ createdAt: -1 });
     }
 
-    res.json(leaves);
+    res.json({ myLeaves, pendingLeaves });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -51,26 +47,33 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Create a new leave request
-router.post("/applyleave", protect, upload.single("attachment"), async (req, res) => {
-  try {
-    const { reason, fromDate, toDate, leaveType } = req.body;
-    const attachment = req.file ? req.file.filename : "";
+router.post(
+  "/applyleave",
+  protect,
+  upload.single("attachment"),
+  async (req, res) => {
+    try {
+      const { reason, fromDate, toDate, leaveType } = req.body;
+      const attachment = req.file ? req.file.filename : "";
 
-    const leave = new Leave({
-      name: req.user.name,
-      reason,
-      fromDate,
-      toDate,
-      leaveType,
-      attachment,
-    });
+      const leave = new Leave({
+        user: req.user._id, // <-- associate the leave with the logged-in user
+        name: req.user.name,
+        email: req.user.email,
+        reason,
+        fromDate,
+        toDate,
+        leaveType,
+        attachment,
+      });
 
-    const savedLeave = await leave.save();
-    res.status(201).json(savedLeave);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
+      const savedLeave = await leave.save();
+      res.status(201).json(savedLeave);
+    } catch (err) {
+      res.status(400).json({ error: err.message });
+    }
   }
-});
+);
 
 // Update leave status (for managers)
 router.put("/updateleave/:id", protect, async (req, res) => {

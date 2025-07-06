@@ -3,7 +3,17 @@ const mongoose = require("mongoose");
 
 const leaveSchema = new mongoose.Schema(
   {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     name: {
+      type: String,
+      required: true,
+    },
+    email: {
+      // Add this too for convenience (optional)
       type: String,
       required: true,
     },
@@ -24,10 +34,13 @@ const leaveSchema = new mongoose.Schema(
       enum: ["Pending", "Approved", "Rejected"],
       default: "Pending",
     },
-    
     leaveType: {
       type: String,
       required: true,
+    },
+    appliedDate: {
+      type: Date,
+      default: Date.now,
     },
     attachment: {
       type: String, // File path

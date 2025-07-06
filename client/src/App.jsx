@@ -7,6 +7,7 @@ import ManagerDashboard from "./pages/ManagerDashboard";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import BackToHome from "./components/BackToHome";
+import LeaveDetails from "./pages/LeaveDetails";
 
 function App() {
   return (
@@ -21,6 +22,14 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={['manager','employee']}>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/leave-details"
+          element={
+            <ProtectedRoute allowedRoles={['manager']}>
+              <LeaveDetails />
             </ProtectedRoute>
           }
         />
