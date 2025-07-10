@@ -1,11 +1,13 @@
 // LeaveDetails.jsx
 import React, { useEffect, useState } from 'react';
-import { Table, Spin, Tag, Button, message } from 'antd';
+import { Table, Spin, Tag, Button, message, Input } from 'antd';
+import { debounce } from 'lodash';
 import axios from 'axios';
 import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
 import BackToHome from '../components/BackToHome';
 import Header from '../components/Header';
+import { useRef } from 'react';
 
 const LeaveDetails = () => {
     const [myLeaves, setMyLeaves] = useState([]);
@@ -15,11 +17,26 @@ const LeaveDetails = () => {
     const user = JSON.parse(localStorage.getItem('user'));
     const navigate = useNavigate();
 
-    const fetchLeaves = async () => {
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const debouncedSearch = useRef(
+        debounce((query) => {
+            fetchLeaves(query);
+        }, 500)
+    ).current;
+
+    const handleSearch = (e) => {
+        const value = e.target.value;
+        setSearchTerm(value);
+        debouncedSearch(value);
+    };
+
+
+    const fetchLeaves = async (search = '') => {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get('http://localhost:5000/api/leaves/getleaves', {
+            const res = await axios.get(`http://localhost:5000/api/leaves/getleaves?search=${search}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setMyLeaves(res.data.myLeaves);
@@ -27,11 +44,29 @@ const LeaveDetails = () => {
                 setPendingLeaves(res.data.pendingLeaves);
             }
         } catch (err) {
-            console.error('Error fetching leave details:', err);
+            console.error('Error fetching leaves:', err);
         } finally {
             setLoading(false);
         }
     };
+
+    // const fetchLeaves = async () => {
+    //     setLoading(true);
+    //     try {
+    //         const token = localStorage.getItem('token');
+    //         const res = await axios.get('http://localhost:5000/api/leaves/getleaves', {
+    //             headers: { Authorization: `Bearer ${token}` },
+    //         });
+    //         setMyLeaves(res.data.myLeaves);
+    //         if (user.role === "manager") {
+    //             setPendingLeaves(res.data.pendingLeaves);
+    //         }
+    //     } catch (err) {
+    //         console.error('Error fetching leave details:', err);
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
 
     useEffect(() => {
         fetchLeaves();
@@ -133,37 +168,45 @@ const LeaveDetails = () => {
 
                 </div>
                 <h2 style={{ marginBlock: 6 }}>Leave Details</h2>
-                {loading ? (
+                {/* {loading ? (
                     <Spin />
-                ) : (
-                    <>
-                        <h3>My Leave Applications</h3>
-                        <Table
-                            dataSource={myLeaves}
-                            columns={commonColumns}
-                            rowKey="_id"
-                            pagination={{ pageSize: 10 }}
-                        />
+                ) : ( */}
+                <>
+                    <h3>My Leave Applications</h3>
+                    <Input
+                        placeholder="Search by name, reason, type, status..."
+                        value={searchTerm}
+                        onChange={handleSearch}
+                        style={{ marginBottom: 16, width: 300 }}
+                    />
+                    <Table
+                        dataSource={myLeaves}
+                        columns={commonColumns}
+                        rowKey="_id"
+                        pagination={{ pageSize: 10 }}
+                        loading={loading}
+                    />
 
-                        {user.role === "manager" && (
-                            <>
-                                <h3 style={{ marginTop: 32 }}>All Pending Leave Requests</h3>
-                                <Table
-                                    dataSource={pendingLeaves}
-                                    columns={[...commonColumns, actionColumn]}
-                                    rowKey="_id"
-                                    pagination={{ pageSize: 10 }}
-                                />
-                            </>
-                        )}
+                    {user.role === "manager" && (
+                        <>
+                            <h3 style={{ marginTop: 32 }}>All Pending Leave Requests</h3>
+                            <Table
+                                dataSource={pendingLeaves}
+                                columns={[...commonColumns, actionColumn]}
+                                rowKey="_id"
+                                pagination={{ pageSize: 10 }}
+                                loading={loading}
+                            />
+                        </>
+                    )}
 
-                        {/* <div style={{ marginTop: 24 }}>
+                    {/* <div style={{ marginTop: 24 }}>
             <Button type="default" onClick={() => navigate('/dashboard')}>
               Back to Dashboard
             </Button>
           </div> */}
-                    </>
-                )}
+                </>
+                {/* )} */}
             </div>
         </>
     );

@@ -18,15 +18,51 @@ const path = require("path");
 //   }
 // });
 
+// router.get("/getleaves", protect, async (req, res) => {
+//   try {
+//     let myLeaves = await Leave.find({ name: req.user.name }).sort({ createdAt: -1 });
+
+//     let pendingLeaves = [];
+//     if (req.user.role === "manager") {
+//       // Only show others' pending leaves
+//       pendingLeaves = await Leave.find({ status: "Pending", name: { $ne: req.user.name } }).sort({ createdAt: -1 });
+//     }
+
+//     res.json({ myLeaves, pendingLeaves });
+//   } catch (err) {
+//     res.status(500).json({ error: err.message });
+//   }
+// });
+
 router.get("/getleaves", protect, async (req, res) => {
   try {
-    let myLeaves = await Leave.find({ name: req.user.name }).sort({ createdAt: -1 });
+  const { search = "" } = req.query;
+const searchRegex = new RegExp(search, 'i'); // case-insensitive
 
-    let pendingLeaves = [];
-    if (req.user.role === "manager") {
-      // Only show others' pending leaves
-      pendingLeaves = await Leave.find({ status: "Pending", name: { $ne: req.user.name } }).sort({ createdAt: -1 });
-    }
+const myLeaves = await Leave.find({
+  name: req.user.name,
+  $or: [
+    { reason: searchRegex },
+    { leaveType: searchRegex },
+    { status: searchRegex },
+    { name: searchRegex },
+  ],
+}).sort({ createdAt: -1 });
+
+let pendingLeaves = [];
+if (req.user.role === "manager") {
+  pendingLeaves = await Leave.find({
+    status: "Pending",
+    name: { $ne: req.user.name },
+    $or: [
+      { reason: searchRegex },
+      { leaveType: searchRegex },
+      { status: searchRegex },
+      { name: searchRegex },
+    ],
+  }).sort({ createdAt: -1 });
+}
+
 
     res.json({ myLeaves, pendingLeaves });
   } catch (err) {

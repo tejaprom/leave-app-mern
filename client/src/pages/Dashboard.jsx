@@ -42,12 +42,6 @@ const Dashboard = () => {
   }, [location, navigate]);
 
 
-  const handleLogout = () => {
-    localStorage.removeItem('token'); // or 'accessToken' if that's what you're using
-    localStorage.removeItem('user');  // if you're storing user info too
-    navigate('/');
-  };
-
   const fetchLeaves = async () => {
     setLoading(true);
     try {
