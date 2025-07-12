@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { auth, provider } from "../firebase";
 import { signInWithPopup } from "firebase/auth";
 import { Input } from 'antd';
-import axiosInstance from '../utils/axiosConfig';
+import { login } from '../utils/apiCalls';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -45,19 +45,11 @@ const Login = () => {
 
         try {
 
-            const res = await axiosInstance.post('http://localhost:5000/api/auth/login', {
-                email,
-                password,
-            });
-
-            // const res = await axiosInstance.post('api/auth/login', {
-            //     email,
-            //     password,
-            // });
-
+            const res = await login({ email, password });
             const { token, user } = res.data;
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));
+
 
             navigate('/dashboard', { state: { loginSuccess: true } });
 
