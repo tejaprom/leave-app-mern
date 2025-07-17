@@ -13,23 +13,26 @@ const app = express();
 //   origin: 'http://localhost:5173',
 //   credentials: true
 // }));
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://leave-app-mern.vercel.app",
-];
 
-app.use(  
-  cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-  })
-);
+// const allowedOrigins = [
+//   "http://localhost:5173",
+//   "https://leave-app-mern.vercel.app",
+// ];
+
+// app.use(  
+//   cors({
+//     origin: function (origin, callback) {
+//       if (!origin || allowedOrigins.includes(origin)) {
+//         callback(null, true);
+//       } else {
+//         callback(new Error("Not allowed by CORS"));
+//       }
+//     },
+//     credentials: true,
+//   })
+// );
+
+app.use(cors({ origin: true, credentials: true }));
 
 app.use(express.json());
 
