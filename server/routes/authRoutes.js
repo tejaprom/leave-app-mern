@@ -108,5 +108,13 @@ router.post("/reset-password", async (req, res) => {
   }
 });
 
+router.post("/debug-token", (req, res) => {
+  res.json({
+    headers: req.headers,
+    auth: req.headers.authorization,
+    cookies: req.cookies,
+  });
+});
+
 
 module.exports = router;
