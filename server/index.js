@@ -61,3 +61,13 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT} 🚀`);
 });
+
+
+
+app.post("/api/auth/debug", (req, res) => {
+  res.json({
+    body: req.body,
+    headers: req.headers,
+    cookies: req.cookies,
+  });
+});
