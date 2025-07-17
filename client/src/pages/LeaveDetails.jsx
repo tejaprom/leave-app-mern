@@ -4,10 +4,11 @@ import { Table, Spin, Tag, Button, message, Input } from 'antd';
 import { debounce } from 'lodash';
 import axios from 'axios';
 import dayjs from 'dayjs';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import BackToHome from '../components/BackToHome';
 import Header from '../components/Header';
 import { useRef } from 'react';
+import { getAllLeaves, updateLeaveStatus } from '../utils/apiCalls';
 
 const LeaveDetails = () => {
     const [myLeaves, setMyLeaves] = useState([]);
@@ -16,6 +17,8 @@ const LeaveDetails = () => {
 
     const user = JSON.parse(localStorage.getItem('user'));
     const navigate = useNavigate();
+    const location = useLocation();
+    const show = location.state?.show || "both"; // fallback to both
 
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -36,9 +39,8 @@ const LeaveDetails = () => {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get(`http://localhost:5000/api/leaves/getleaves?search=${search}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
+            const res = await getAllLeaves({ search });
+            // console.log(res.config.url);
             setMyLeaves(res.data.myLeaves);
             if (user.role === "manager") {
                 setPendingLeaves(res.data.pendingLeaves);
@@ -74,12 +76,7 @@ const LeaveDetails = () => {
 
     const handleDecision = async (leaveId, status) => {
         try {
-            const token = localStorage.getItem('token');
-            await axios.put(`http://localhost:5000/api/leaves/updateleave/${leaveId}`, { status }, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            await updateLeaveStatus(leaveId, status);
             message.success(`Leave ${status.toLowerCase()} successfully!`);
             fetchLeaves(); // Refresh data
         } catch (err) {
@@ -155,41 +152,55 @@ const LeaveDetails = () => {
         ),
     };
 
-
     return (
         <>
             <Header />
             <div style={{ padding: 24 }}>
                 <div style={{ marginBlock: 16 }}>
-                    {/* <Button type="default" onClick={() => navigate('/dashboard')}>
-                    Back to Dashboard
-                </Button> */}
                     <BackToHome path="/dashboard" btntext=" Go to Dashboard" />
-
                 </div>
                 <h2 style={{ marginBlock: 6 }}>Leave Details</h2>
                 {/* {loading ? (
                     <Spin />
                 ) : ( */}
-                <>
-                    <h3>My Leave Applications</h3>
-                    <Input
-                        placeholder="Search by name, reason, type, status..."
-                        value={searchTerm}
-                        onChange={handleSearch}
-                        style={{ marginBottom: 16, width: 300 }}
-                    />
-                    <Table
-                        dataSource={myLeaves}
-                        columns={commonColumns}
-                        rowKey="_id"
-                        pagination={{ pageSize: 10 }}
-                        loading={loading}
-                    />
 
-                    {user.role === "manager" && (
+                <>
+
+                    {(show === 'myLeaves' || show === 'both') && (
                         <>
-                            <h3 style={{ marginTop: 32 }}>All Pending Leave Requests</h3>
+                            <div style={{ display: "flex", justifyContent: "space-between" }}>
+                                <h3>My Leave Applications</h3>
+                                <Input
+                                    placeholder="Search by name, reason, type, status..."
+                                    value={searchTerm}
+                                    onChange={handleSearch}
+                                    style={{ marginBottom: 16, width: 300 }}
+                                />
+                            </div>
+
+                            <Table
+                                dataSource={myLeaves}
+                                columns={commonColumns}
+                                rowKey="_id"
+                                pagination={{ pageSize: 10 }}
+                                loading={loading}
+                            />
+                        </>
+                    )}
+
+                    {user.role === "manager" && (show === 'pendingLeaves' || show === 'both') && (
+                        <>
+                            <div style={{ display: "flex", justifyContent: "space-between" }}>
+
+                                <h3>All Pending Leave Requests</h3>
+                                <Input
+                                    placeholder="Search by name, reason, type, status..."
+                                    value={searchTerm}
+                                    onChange={handleSearch}
+                                    style={{ marginBottom: 16, width: 300 }}
+                                />
+                            </div>
+
                             <Table
                                 dataSource={pendingLeaves}
                                 columns={[...commonColumns, actionColumn]}
@@ -199,12 +210,6 @@ const LeaveDetails = () => {
                             />
                         </>
                     )}
-
-                    {/* <div style={{ marginTop: 24 }}>
-            <Button type="default" onClick={() => navigate('/dashboard')}>
-              Back to Dashboard
-            </Button>
-          </div> */}
                 </>
                 {/* )} */}
             </div>

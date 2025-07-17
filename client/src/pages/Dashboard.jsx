@@ -5,6 +5,9 @@ import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { showToast } from '../utils/showToast';
 import Header from '../components/Header';
+// import { API_BASE_URL } from '../utils/axiosConfig';
+import { applyLeave, getAllLeaves, updateLeaveStatus } from '../utils/apiCalls';
+import { API_BASE_URL } from '../utils/constants';
 
 const Dashboard = () => {
   const user = JSON.parse(localStorage.getItem('user'));
@@ -45,10 +48,7 @@ const Dashboard = () => {
   const fetchLeaves = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/leaves/getleaves', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await getAllLeaves();
       // setLeaves(res.data);
       setMyLeaves(res.data.myLeaves);
       if (user.role === "manager") {
@@ -109,7 +109,6 @@ const Dashboard = () => {
         return <Tag color={color}>{status}</Tag>;
       }
     }
-
   ];
 
   // const myLeaves = leaves.filter(l => l.name === user.name);
@@ -117,7 +116,6 @@ const Dashboard = () => {
 
   const handleApply = async (values) => {
     try {
-      const token = localStorage.getItem('token');
       const formData = new FormData();
 
       formData.append('leaveType', values.leaveType);
@@ -131,12 +129,7 @@ const Dashboard = () => {
         formData.append('attachment', fileInput.files[0]);
       }
 
-      await axios.post('http://localhost:5000/api/leaves/applyleave', formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data'
-        }
-      });
+      await applyLeave(formData);
 
       message.success('Leave applied successfully');
       setIsModalVisible(false);
@@ -150,12 +143,7 @@ const Dashboard = () => {
 
   const openReviewModal = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/leaves/getleaves', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await getAllLeaves();
       setAllLeaves(response.data);
       setIsReviewModalVisible(true);
     } catch (err) {
@@ -166,20 +154,13 @@ const Dashboard = () => {
 
   const handleDecision = async (leaveId, status) => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.put(`http://localhost:5000/api/leaves/updateleave/${leaveId}`, { status }, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      // message.success(`Leave ${status}`);
+      await updateLeaveStatus(leaveId, status);
       console.log(`Trying to show toast: ${status}`);
       message.success(`Leave ${status.toLowerCase()} successfully!`);
       openReviewModal(); // refresh list
       fetchLeaves(); // refresh dashboard table
     } catch (err) {
       console.error('Decision error:', err);
-      // message.error('Action failed');
       message.error(`Failed to ${status.toLowerCase()} leave. Try again.`);
     }
   };
@@ -218,7 +199,7 @@ const Dashboard = () => {
               pagination={false}
             />
             <div style={{ textAlign: 'end', marginTop: 16 }}>
-              <Button type="link" style={{ textDecoration: 'underline' }} onClick={() => navigate('/leave-details')}>
+              <Button type="link" style={{ textDecoration: 'underline' }} onClick={() => navigate('/leave-details', { state: { show: 'myLeaves' } })}>
                 View All
               </Button>
             </div>
@@ -243,7 +224,7 @@ const Dashboard = () => {
             // pagination={{ pageSize: 5 }}
             />
             <div style={{ textAlign: 'end', marginTop: 16 }}>
-              <Button type="link" style={{ textDecoration: 'underline' }} onClick={() => navigate('/leave-details')}>
+              <Button type="link" style={{ textDecoration: 'underline' }} onClick={() => navigate('/leave-details', { state: { show: 'pendingLeaves' } })}>
                 View All
               </Button>
             </div>
@@ -304,8 +285,9 @@ const Dashboard = () => {
           open={isReviewModalVisible}
           onCancel={() => setIsReviewModalVisible(false)}
           footer={null}
-          width={800}
+          width={1800}
         >
+          {/* <div style={{ overflowX: 'auto' }}> */}
           <Table
             dataSource={pendingLeaves}
             rowKey="_id"
@@ -337,7 +319,7 @@ const Dashboard = () => {
                 dataIndex: 'attachment',
                 render: file =>
                   file ? (
-                    <a href={`http://localhost:5000/uploads/${file}`} target="_blank" rel="noreferrer">
+                    <a href={`${API_BASE_URL}/uploads/${file}`} target="_blank" rel="noreferrer">
                       View
                     </a>
                   ) : (
@@ -351,7 +333,7 @@ const Dashboard = () => {
               {
                 title: 'Action',
                 render: (_, record) => (
-                  <>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                     <Button
                       type="primary"
                       size="small"
@@ -368,12 +350,14 @@ const Dashboard = () => {
                     >
                       Reject
                     </Button>
-                  </>
+                  </div>
                 ),
               },
             ]}
             pagination={false}
+            scroll={{ x: true, y: 600 }}
           />
+          {/* </div> */}
         </Modal>
       </div>
 

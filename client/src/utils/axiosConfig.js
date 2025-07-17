@@ -1,21 +1,23 @@
+// client/src/utils/axiosConfig.js:-
 import axios from "axios";
+import { API_BASE_URL } from "./constants";
 
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api",
+  // baseURL: API_BASE_URL || "http://localhost:5000",
+  baseURL: API_BASE_URL,
   withCredentials: true, // Allows sending HttpOnly cookies
 });
 
 // Request interceptor to attach access token
-// axiosInstance.interceptors.request.use(
-//   (config) => {
-//     const token = localStorage.getItem("accessToken");
-//     if (token) {
-//       config.headers.Authorization = `Bearer ${token}`;
-//     }
-//     return config;
-//   },
-//   (error) => Promise.reject(error)
-// );
+axiosInstance.interceptors.request.use((config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 // Response interceptor to handle token expiry and retry failed requests
 // let isRefreshing = false;

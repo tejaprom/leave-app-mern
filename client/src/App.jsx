@@ -28,14 +28,14 @@ function App() {
         <Route
           path="/leave-details"
           element={
-            <ProtectedRoute allowedRoles={['manager']}>
+            <ProtectedRoute allowedRoles={['manager','employee']}>
               <LeaveDetails />
             </ProtectedRoute>
           }
         />
         <Route path="/unauthorized" element={
           <>
-            <BackToHome />
+            <BackToHome path="/" btntext=" Back to Login"/>
             <h2>Unauthorized Access</h2>
           </>
         } />

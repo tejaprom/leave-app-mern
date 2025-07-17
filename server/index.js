@@ -18,7 +18,7 @@ const allowedOrigins = [
   "https://leave-app-mern.vercel.app",
 ];
 
-app.use(
+app.use(  
   cors({
     origin: function (origin, callback) {
       if (!origin || allowedOrigins.includes(origin)) {

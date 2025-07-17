@@ -1,3 +1,4 @@
+// client/src/utils/apiCalls.js:-
 import axiosInstance from "./axiosConfig";
 
 // Optional: Add interceptors here if needed
@@ -15,9 +16,9 @@ export const resetPassword = (token, newPassword) =>
   axiosInstance.post(`${AUTH_API}/reset-password/${token}`, { newPassword });
 
 /* Leave APIs */
-export const getAllLeaves = (params) => axiosInstance.get(LEAVES_API, { params });
+export const getAllLeaves = (params) => axiosInstance.get(`${LEAVES_API}/getleaves`, { params });
 export const getLeaveById = (id) => axiosInstance.get(`${LEAVES_API}/${id}`);
-export const applyLeave = (formData) => axiosInstance.post(`${LEAVES_API}/apply`, formData);
+export const applyLeave = (formData) => axiosInstance.post(`${LEAVES_API}/applyleave`, formData);
 export const updateLeaveStatus = (id, status) =>
-  axiosInstance.put(`${LEAVES_API}/${id}/status`, { status });
+  axiosInstance.put(`${LEAVES_API}/updateleave/${id}`, { status });
 export const deleteLeave = (id) => axiosInstance.delete(`${LEAVES_API}/${id}`);
