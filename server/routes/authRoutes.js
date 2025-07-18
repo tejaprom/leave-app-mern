@@ -64,7 +64,7 @@ router.post("/forgot-password", async (req, res) => {
     user.resetTokenExpiration = Date.now() + 3600000; // 1 hour
     await user.save();
 
-    const resetUrl = `/reset-password/${token}`;
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${token}`;
 
     // Replace with your actual email service credentials
     await sendEmail(
