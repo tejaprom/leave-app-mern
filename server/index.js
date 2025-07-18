@@ -64,10 +64,10 @@ app.listen(PORT, () => {
 
 
 
-app.post("/api/auth/debug", (req, res) => {
-  res.json({
-    body: req.body,
-    headers: req.headers,
-    cookies: req.cookies,
-  });
-});
+// app.post("/api/auth/debug", (req, res) => {
+//   res.json({
+//     body: req.body,
+//     headers: req.headers,
+//     cookies: req.cookies,
+//   });
+// });

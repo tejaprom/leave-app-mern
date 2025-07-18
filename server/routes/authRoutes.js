@@ -3,7 +3,11 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const router = express.Router();
-const { protect, authorize } = require("../middleware/authMiddleware"); 
+const { protect, authorize } = require("../middleware/authMiddleware");
+
+const dotenv = require("dotenv");
+dotenv.config();
+
 // 🔐 Protected route (any logged-in user)
 router.get("/profile", protect, (req, res) => {
   res.json({
@@ -64,6 +68,9 @@ router.post("/forgot-password", async (req, res) => {
     user.resetTokenExpiration = Date.now() + 3600000; // 1 hour
     await user.save();
 
+    // const resetUrl = `http://localhost:5173/reset-password/${token}`;
+    // const resetUrl = `https://leave-app-mern-client.onrender.com/reset-password/${token}`;
+
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${token}`;
 
     // Replace with your actual email service credentials
@@ -109,13 +116,12 @@ router.post("/reset-password", async (req, res) => {
   }
 });
 
-router.post("/debug-token", (req, res) => {
-  res.json({
-    headers: req.headers,
-    auth: req.headers.authorization,
-    cookies: req.cookies,
-  });
-});
-
+// router.post("/debug-token", (req, res) => {
+//   res.json({
+//     headers: req.headers,
+//     auth: req.headers.authorization,
+//     cookies: req.cookies,
+//   });
+// });
 
 module.exports = router;
