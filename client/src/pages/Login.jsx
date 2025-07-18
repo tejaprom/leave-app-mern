@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import '../styles/Login.css';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { auth, provider } from "../firebase";
 import { signInWithPopup } from "firebase/auth";
 import { Input } from 'antd';
@@ -96,7 +96,7 @@ const Login = () => {
                     <button type="submit">Login</button>
                 </form>
                 <p style={{ marginTop: '10px' }}>
-                    <a href="/forgot-password">Forgot Password?</a>
+                    <Link href="/forgot-password">Forgot Password?</Link>
                 </p>
                 <button onClick={handleGoogleLogin} className="google-signin-btn">
                     <img
