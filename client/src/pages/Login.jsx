@@ -96,7 +96,7 @@ const Login = () => {
                     <button type="submit">Login</button>
                 </form>
                 <p style={{ marginTop: '10px' }}>
-                    <Link href="/forgot-password">Forgot Password?</Link>
+                    <Link to="/forgot-password">Forgot Password?</Link>
                 </p>
                 <button onClick={handleGoogleLogin} className="google-signin-btn">
                     <img
