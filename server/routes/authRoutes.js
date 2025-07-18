@@ -1,3 +1,4 @@
+// server/routes/authRoutes:-
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
@@ -63,7 +64,7 @@ router.post("/forgot-password", async (req, res) => {
     user.resetTokenExpiration = Date.now() + 3600000; // 1 hour
     await user.save();
 
-    const resetUrl = `http://localhost:5173/reset-password/${token}`;
+    const resetUrl = `/reset-password/${token}`;
 
     // Replace with your actual email service credentials
     await sendEmail(

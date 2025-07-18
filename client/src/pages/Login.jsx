@@ -3,7 +3,7 @@ import '../styles/Login.css';
 import { Link, useNavigate } from 'react-router-dom';
 import { auth, provider } from "../firebase";
 import { signInWithPopup } from "firebase/auth";
-import { Input } from 'antd';
+import { Button, Input } from 'antd';
 import { login } from '../utils/apiCalls';
 
 const Login = () => {
@@ -11,7 +11,7 @@ const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-
+    const [loading, setLoading] = useState(false);
 
     const handleGoogleLogin = async () => {
         try {
@@ -42,15 +42,12 @@ const Login = () => {
     const handleLogin = async (e) => {
         e.preventDefault();
         setError('');
-
+        setLoading(true); // 🔹 Start loader
         try {
-
             const res = await login({ email, password });
             const { token, user } = res.data;
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));
-
-
             navigate('/dashboard', { state: { loginSuccess: true } });
 
             //   if (user.role === 'manager') {
@@ -60,6 +57,8 @@ const Login = () => {
             //   }
         } catch (err) {
             setError(err.response?.data?.error || 'Login failed');
+        } finally {
+            setLoading(false); // 🔹 Stop loader
         }
     };
 
@@ -93,7 +92,7 @@ const Login = () => {
 
 
                     <br /><br />
-                    <button type="submit">Login</button>
+                    <Button type="primary" htmlType="submit" loading={loading}>Login</Button>
                 </form>
                 <p style={{ marginTop: '10px' }}>
                     <Link to="/forgot-password">Forgot Password?</Link>
