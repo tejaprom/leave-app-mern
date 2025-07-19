@@ -87,13 +87,9 @@ router.post("/forgot-password", async (req, res) => {
 });
 
 // Reset Password
-router.post("/reset-password", async (req, res) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(400).json({ error: "No token provided" });
-  }
-
-  const token = authHeader.split(" ")[1];
+// ✅ Fix (token in URL)
+router.post("/reset-password/:token", async (req, res) => {
+  const token = req.params.token;
   const { password } = req.body;
 
   try {
@@ -115,6 +111,7 @@ router.post("/reset-password", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 // router.post("/debug-token", (req, res) => {
 //   res.json({

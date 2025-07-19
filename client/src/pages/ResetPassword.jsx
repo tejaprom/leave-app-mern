@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
 import BackToHome from '../components/BackToHome';
 import { Button } from "antd";
 import { resetPassword } from "../utils/apiCalls";
