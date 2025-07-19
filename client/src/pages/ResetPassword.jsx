@@ -30,8 +30,9 @@ const ResetPassword = () => {
       {/* <BackToHome /> */}
       <h2>Reset Password</h2>
       <form onSubmit={handleReset}>
-        {message && <p>{message}</p>}
+        <h4>Enter your new password</h4>
         <input type="password" placeholder="New password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        {message && <p>{message}</p>}
         <Button type="primary" htmlType="submit" loading={loading}>Reset</Button>
       </form>
     </div>
