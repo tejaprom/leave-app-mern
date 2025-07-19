@@ -12,8 +12,8 @@ const AUTH_API = '/api/auth';
 export const login = (credentials) => axiosInstance.post(`${AUTH_API}/login`, credentials);
 export const register = (userData) => axiosInstance.post(`${AUTH_API}/register`, userData);
 export const forgotPassword = (email) => axiosInstance.post(`${AUTH_API}/forgot-password`, { email });
-export const resetPassword = (token, newPassword) =>
-  axiosInstance.post(`${AUTH_API}/reset-password/${token}`, { newPassword });
+export const resetPassword = (token, password) =>
+  axiosInstance.post(`${AUTH_API}/reset-password/${token}`, { password });
 
 /* Leave APIs */
 export const getAllLeaves = (params) => axiosInstance.get(`${LEAVES_API}/getleaves`, { params });
