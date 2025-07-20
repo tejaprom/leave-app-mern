@@ -5,6 +5,8 @@ import { auth, provider } from "../firebase";
 import { signInWithPopup } from "firebase/auth";
 import { Button, Input } from 'antd';
 import { login } from '../utils/apiCalls';
+import { useDispatch } from 'react-redux';
+import { setToken } from '../redux/authSlice';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -12,6 +14,7 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const dispatch = useDispatch();
 
     const handleGoogleLogin = async () => {
         try {
@@ -29,7 +32,7 @@ const Login = () => {
                 email: user.email,
                 role: "employee", // Default role or infer later
             }));
-
+            dispatch(setToken(token));
             // Navigate to dashboard or homepage
             window.location.href = "/dashboard";
 
@@ -48,6 +51,7 @@ const Login = () => {
             const { token, user } = res.data;
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));
+            dispatch(setToken(token));
             navigate('/dashboard', { state: { loginSuccess: true } });
 
             //   if (user.role === 'manager') {

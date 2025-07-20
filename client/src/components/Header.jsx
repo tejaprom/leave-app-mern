@@ -1,14 +1,18 @@
 import React from 'react'
+import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { logout } from '../redux/authSlice';
 
 const Header = () => {
     const user = JSON.parse(localStorage.getItem('user'));
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const handleLogout = () => {
-        localStorage.removeItem('token'); // or 'accessToken' if that's what you're using
-        localStorage.removeItem('user');  // if you're storing user info too
-        navigate('/');
+        // localStorage.removeItem('token'); // or 'accessToken' if that's what you're using
+        // localStorage.removeItem('user');  // if you're storing user info too
+        // navigate('/');
+        dispatch(logout());
     };
     return (
         <div style={{ padding: 16, backgroundColor: "#e3e3e8" }}>

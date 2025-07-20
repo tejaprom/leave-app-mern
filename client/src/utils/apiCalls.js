@@ -14,6 +14,12 @@ export const register = (userData) => axiosInstance.post(`${AUTH_API}/register`,
 export const forgotPassword = (email) => axiosInstance.post(`${AUTH_API}/forgot-password`, { email });
 export const resetPassword = (token, password) =>
   axiosInstance.post(`${AUTH_API}/reset-password/${token}`, { password });
+export const refreshAccessToken = () => axiosInstance.post(`${AUTH_API}/refresh-token`);
+export const logoutUser = () => {
+  return axiosInstance.post(`${AUTH_API}/logout`, null, {
+    withCredentials: true, // required to send the refresh token cookie
+  });
+};
 
 /* Leave APIs */
 export const getAllLeaves = (params) => axiosInstance.get(`${LEAVES_API}/getleaves`, { params });

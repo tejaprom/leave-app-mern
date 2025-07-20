@@ -8,10 +8,14 @@ import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import BackToHome from "./components/BackToHome";
 import LeaveDetails from "./pages/LeaveDetails";
+import SessionHandler from "./components/SessionHandler";
+import { useSelector } from "react-redux";
 
 function App() {
+  const { isAuthenticated } = useSelector((state) => state.auth);
   return (
     <Router>
+      {isAuthenticated && <SessionHandler />} {/* 👈 handles session tracking globally */}
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />

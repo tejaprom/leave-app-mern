@@ -40,6 +40,19 @@ router.post("/register", async (req, res) => {
 });
 
 // Login
+// Add at the top
+const generateAccessToken = (user) => {
+  return jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
+    expiresIn: "1h", // shorter lived
+  });
+};
+
+const generateRefreshToken = (user) => {
+  return jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    expiresIn: "7d", // longer lived
+  });
+};
+
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -47,11 +60,42 @@ router.post("/login", async (req, res) => {
     if (!user || !(await user.matchPassword(password))) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
-    res.json({ token: generateToken(user), user });
+
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None", // important for cross-origin
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    res.json({ token: accessToken, user });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
+
+router.post("/refresh-token", async (req, res) => {
+  const token = req.cookies.refreshToken;
+  if (!token) return res.status(401).json({ error: "No refresh token" });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id);
+    if (!user) return res.status(401).json({ error: "User not found" });
+
+    const accessToken = generateAccessToken(user);
+    res.json({ token: accessToken });
+  } catch (err) {
+    return res.status(403).json({ error: "Invalid or expired refresh token" });
+  }
+});
+
+
+
 
 const crypto = require("crypto");
 const sendEmail = require("../utils/sendEmail");
@@ -110,6 +154,15 @@ router.post("/reset-password/:token", async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+router.post("/logout", (req, res) => {
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None",
+  });
+  res.status(200).json({ message: "Logged out" });
 });
 
 
