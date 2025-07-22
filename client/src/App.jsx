@@ -11,6 +11,7 @@ import LeaveDetails from "./pages/LeaveDetails";
 import SessionHandler from "./components/SessionHandler";
 import { useSelector } from "react-redux";
 import DebugAuth from "./redux/DebugAuth";
+import Register from "./pages/Register";
 
 function App() {
   const { isAuthenticated } = useSelector((state) => state.auth);
@@ -20,13 +21,14 @@ function App() {
       {isAuthenticated && <SessionHandler />} {/* 👈 handles session tracking globally */}
       <Routes>
         <Route path="/" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         {/* <Route path="/dashboard" element={<Dashboard />} /> */}
         <Route
           path="/dashboard"
           element={
-            <ProtectedRoute allowedRoles={['manager','employee']}>
+            <ProtectedRoute allowedRoles={['manager', 'employee']}>
               <Dashboard />
             </ProtectedRoute>
           }
@@ -34,14 +36,14 @@ function App() {
         <Route
           path="/leave-details"
           element={
-            <ProtectedRoute allowedRoles={['manager','employee']}>
+            <ProtectedRoute allowedRoles={['manager', 'employee']}>
               <LeaveDetails />
             </ProtectedRoute>
           }
         />
         <Route path="/unauthorized" element={
           <>
-            <BackToHome path="/" btntext=" Back to Login"/>
+            <BackToHome path="/" btntext=" Back to Login" />
             <h2>Unauthorized Access</h2>
           </>
         } />
