@@ -2,7 +2,7 @@ import { useState } from 'react';
 import '../styles/ForgotPassword.css'; // Reusing the same CSS
 import { useNavigate } from 'react-router-dom';
 import BackToHome from '../components/BackToHome';
-import { Button, Select } from 'antd';
+import { Button, Select, Input } from 'antd';
 import { register } from '../utils/apiCalls';
 
 const { Option } = Select;
@@ -21,8 +21,10 @@ const Register = () => {
     const navigate = useNavigate();
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+};
+
 
     const handleRoleChange = (value) => {
         setFormData({ ...formData, role: value });
@@ -36,7 +38,7 @@ const Register = () => {
             setError('');
             const res = await register(formData);
             setMessage('Registration successful! Redirecting to login...');
-            setTimeout(() => navigate('/login'), 2000); // Redirect after 2s
+            setTimeout(() => navigate('/'), 2000); // Redirect after 2s
         } catch (err) {
             setError(err.response?.data?.error || 'Something went wrong');
         } finally {
@@ -65,14 +67,13 @@ const Register = () => {
                     onChange={handleChange}
                     required
                 />
-                <input
-                    type="password"
-                    name="password"
+                <Input.Password
                     placeholder="Enter your password"
                     value={formData.password}
-                    onChange={handleChange}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     required
                 />
+
                 <Select
                     placeholder="Select Role"
                     value={formData.role || undefined}
