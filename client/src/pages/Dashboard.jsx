@@ -8,9 +8,14 @@ import Header from '../components/Header';
 // import { API_BASE_URL } from '../utils/axiosConfig';
 import { applyLeave, getAllLeaves, updateLeaveStatus } from '../utils/apiCalls';
 import { API_BASE_URL } from '../utils/constants';
+import { useSelector } from 'react-redux';
+import LoadingWrapper from '../components/LoadingWrapper';
 
 const Dashboard = () => {
-  const user = JSON.parse(localStorage.getItem('user'));
+  // const user = JSON.parse(localStorage.getItem('user'));
+  const { user } = useSelector((state) => state.auth);
+  const isLoading = !user; // setting loader while Redux state (like user) is being loaded.
+
   // const [leaves, setLeaves] = useState([]);
   const [myLeaves, setMyLeaves] = useState([]);
   const [pendingLeaves, setPendingLeaves] = useState([]);
@@ -171,6 +176,7 @@ const Dashboard = () => {
 
   return (
     <>
+      <LoadingWrapper isLoading={isLoading}></LoadingWrapper>
       <Header />
       <div style={{ padding: 24 }}>
         <h3>My Applied Leaves</h3>

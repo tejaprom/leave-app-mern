@@ -9,8 +9,9 @@ const LEAVES_API = '/api/leaves';
 const AUTH_API = '/api/auth';
 
 /* Auth APIs */
-export const login = (credentials) => axiosInstance.post(`${AUTH_API}/login`, credentials);
 export const register = (userData) => axiosInstance.post(`${AUTH_API}/register`, userData);
+export const login = (credentials) => axiosInstance.post(`${AUTH_API}/login`, credentials);
+export const googleLogin = (data) => axiosInstance.post(`${AUTH_API}/google-login`, data);
 export const forgotPassword = (email) => axiosInstance.post(`${AUTH_API}/forgot-password`, { email });
 export const resetPassword = (token, password) =>
   axiosInstance.post(`${AUTH_API}/reset-password/${token}`, { password });
@@ -19,7 +20,7 @@ export const logoutUser = () => {
   return axiosInstance.post(`${AUTH_API}/logout`, null, {
     withCredentials: true, // required to send the refresh token cookie
   });
-};
+}; // this apicall is to clear refreshToken from the cookies
 
 /* Leave APIs */
 export const getAllLeaves = (params) => axiosInstance.get(`${LEAVES_API}/getleaves`, { params });

@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import '../styles/Login.css';
 import { Link, useNavigate } from 'react-router-dom';
 import { auth, provider } from "../firebase";
-import { signInWithPopup } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { Button, Input } from 'antd';
-import { login } from '../utils/apiCalls';
+import { googleLogin, login } from '../utils/apiCalls';
 import { useDispatch } from 'react-redux';
-import { setToken } from '../redux/authSlice';
+import { setToken, setUser } from '../redux/authSlice';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -16,30 +16,28 @@ const Login = () => {
     const [loading, setLoading] = useState(false);
     const dispatch = useDispatch();
 
-    const handleGoogleLogin = async () => {
-        try {
-            const result = await signInWithPopup(auth, provider);
-            const user = result.user;
-            const token = await user.getIdToken();
+     const handleGoogleLogin = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      const auth = getAuth();
+      const result = await signInWithPopup(auth, provider);
+      const { displayName, email } = result.user;
 
-            console.log("Google User:", user);
-            console.log("Token:", token);
+      // Send to backend
+      const res = await googleLogin( {
+        name: displayName,
+        email,
+        role: "manager", // You can change this if needed
+      });
 
-            // You can now store token or user info if needed
-            localStorage.setItem("token", token);
-            localStorage.setItem("user", JSON.stringify({
-                name: user.displayName,
-                email: user.email,
-                role: "employee", // Default role or infer later
-            }));
-            dispatch(setToken(token));
-            // Navigate to dashboard or homepage
-            window.location.href = "/dashboard";
+      dispatch(setToken(res.data.token));
+      dispatch(setUser(res.data.user));
+      navigate("/dashboard"); // or wherever you want
 
-        } catch (error) {
-            console.error("Google Login Error:", error.message);
-        }
-    };
+    } catch (err) {
+      console.error("Google login error:", err);
+    }
+  };
 
 
     const handleLogin = async (e) => {
@@ -49,16 +47,12 @@ const Login = () => {
         try {
             const res = await login({ email, password });
             const { token, user } = res.data;
-            localStorage.setItem('token', token);
-            localStorage.setItem('user', JSON.stringify(user));
+            // localStorage.setItem('token', token);
+            // localStorage.setItem('user', JSON.stringify(user));
             dispatch(setToken(token));
+            dispatch(setUser(user));
             navigate('/dashboard', { state: { loginSuccess: true } });
-
-            //   if (user.role === 'manager') {
-            //     navigate('/manager-dashboard');
-            //   } else {
-            //     navigate('/employee-dashboard');
-            //   }
+console.log('Navigated to dashboard');
         } catch (err) {
             setError(err.response?.data?.error || 'Login failed');
         } finally {
@@ -79,13 +73,6 @@ const Login = () => {
                         onChange={(e) => setEmail(e.target.value)}
                         required
                     /><br /><br />
-                    {/* <input
-                        type="password"
-                        placeholder="Password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    /> */}
 
                     <Input.Password
                         placeholder="Password"
@@ -93,7 +80,6 @@ const Login = () => {
                         onChange={(e) => setPassword(e.target.value)}
                         required
                     />
-
 
                     <br /><br />
                     <Button type="primary" htmlType="submit" loading={loading}>Login</Button>

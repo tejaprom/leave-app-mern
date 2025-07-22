@@ -1,10 +1,11 @@
 import React from 'react'
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../redux/authSlice';
 
 const Header = () => {
-    const user = JSON.parse(localStorage.getItem('user'));
+    const { user } = useSelector((state) => state.auth);
+    // const user = JSON.parse(localStorage.getItem('user'));
     const navigate = useNavigate();
     const dispatch = useDispatch();
 

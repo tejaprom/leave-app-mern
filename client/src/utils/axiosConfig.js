@@ -2,6 +2,8 @@
 import axios from "axios";
 import { API_BASE_URL } from "./constants";
 import { refreshAccessToken } from "./apiCalls";
+import { store } from "../redux/store";
+import { logout, setToken } from "../redux/authSlice";
 
 const axiosInstance = axios.create({
   // baseURL: API_BASE_URL || "http://localhost:5000",
@@ -12,7 +14,8 @@ const axiosInstance = axios.create({
 // Request interceptor to attach access token
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    // const token = localStorage.getItem("token");
+    const token = store.getState().auth.token;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -20,6 +23,9 @@ axiosInstance.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
+
+// Prevent infinite refresh loop
+let isRefreshing = false;
 
 // ✅ Response interceptor: Auto refresh token on 401
 axiosInstance.interceptors.response.use(
@@ -31,23 +37,35 @@ axiosInstance.interceptors.response.use(
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
-      !originalRequest.url.includes("/auth/login")
+      !originalRequest.url.includes("/auth/login") &&
+      !originalRequest.url.includes("/auth/google-login") &&
+      !originalRequest.url.includes("/auth/refresh-token")
     ) {
+      if (isRefreshing) return Promise.reject(error);
       originalRequest._retry = true;
+      isRefreshing = true;
 
       try {
         const res = await refreshAccessToken(); // Get new accessToken
         const newAccessToken = res.data.token;
 
-        localStorage.setItem("token", newAccessToken);
+        // localStorage.setItem("token", newAccessToken);
 
-        // Update the failed request with new token
+        // Update Redux and localStorage with new token
+        store.dispatch(setToken(newAccessToken));
+
+        // Retry failed request with new token
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        isRefreshing = false;
 
         return axiosInstance(originalRequest); // Retry request
       } catch (err) {
-        localStorage.removeItem("token");
-        window.location.href = "/"; // Optional: redirect to login
+        // localStorage.removeItem("token");
+        // window.location.href = "/"; // Optional: redirect to login
+
+        // Expired/invalid refresh token — force logout
+        store.dispatch(logout());
+        isRefreshing = false;
         return Promise.reject(err);
       }
     }

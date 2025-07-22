@@ -9,13 +9,15 @@ import BackToHome from '../components/BackToHome';
 import Header from '../components/Header';
 import { useRef } from 'react';
 import { getAllLeaves, updateLeaveStatus } from '../utils/apiCalls';
+import { useSelector } from 'react-redux';
 
 const LeaveDetails = () => {
     const [myLeaves, setMyLeaves] = useState([]);
     const [pendingLeaves, setPendingLeaves] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    const user = JSON.parse(localStorage.getItem('user'));
+    // const user = JSON.parse(localStorage.getItem('user'));
+    const { user } = useSelector((state) => state.auth);
     const navigate = useNavigate();
     const location = useLocation();
     const show = location.state?.show || "both"; // fallback to both
@@ -38,7 +40,6 @@ const LeaveDetails = () => {
     const fetchLeaves = async (search = '') => {
         setLoading(true);
         try {
-            const token = localStorage.getItem('token');
             const res = await getAllLeaves({ search });
             // console.log(res.config.url);
             setMyLeaves(res.data.myLeaves);

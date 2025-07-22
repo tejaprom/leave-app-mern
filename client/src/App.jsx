@@ -10,11 +10,13 @@ import BackToHome from "./components/BackToHome";
 import LeaveDetails from "./pages/LeaveDetails";
 import SessionHandler from "./components/SessionHandler";
 import { useSelector } from "react-redux";
+import DebugAuth from "./redux/DebugAuth";
 
 function App() {
   const { isAuthenticated } = useSelector((state) => state.auth);
   return (
     <Router>
+      <DebugAuth />
       {isAuthenticated && <SessionHandler />} {/* 👈 handles session tracking globally */}
       <Routes>
         <Route path="/" element={<Login />} />
